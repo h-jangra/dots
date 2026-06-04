@@ -3,3 +3,6 @@ entries:
     - name: zed
       source: /home/himanshu/.config/zed
       target: zed
+    - name: alacritty
+      source: /home/himanshu/.config/alacritty
+      target: alacritty
