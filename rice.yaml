@@ -1,0 +1,5 @@
+version: 1
+entries:
+    - name: zed
+      source: /home/himanshu/.config/zed
+      target: zed
