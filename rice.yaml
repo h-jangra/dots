@@ -6,3 +6,6 @@ entries:
     - name: alacritty
       source: /home/himanshu/.config/alacritty
       target: alacritty
+    - name: niri
+      source: /home/himanshu/.config/niri
+      target: niri
