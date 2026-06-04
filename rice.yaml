@@ -9,3 +9,9 @@ entries:
     - name: niri
       source: /home/himanshu/.config/niri
       target: niri
+    - name: zshrc
+      source: /home/himanshu/.zshrc
+      target: zshrc
+    - name: copytree.sh
+      source: /home/himanshu/copytree.sh
+      target: copytree.sh
