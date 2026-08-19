@@ -12,38 +12,16 @@ alias ls='eza --icons'
 alias ll='eza -lh --icons --git'
 alias la='eza -lah --icons --git'
 
-git_prompt_status() {
+dir_name() {
+    printf '\[\e[38;5;117m\] %s\[\e[0m\]' "$PWD"
+}
+
+git_repo_if() {
     git rev-parse --is-inside-work-tree &>/dev/null || return
-
-    local git_info=""
-    local git_status
-
-    git_status=$(git status --porcelain=v2 --branch 2>/dev/null)
-
-    echo "$git_status" | grep -q '^1 ' && git_info+=" \[\e[33m\]●\[\e[0m\]"
-    echo "$git_status" | grep -q '^? ' && git_info+=" \[\e[31m\]?\[\e[0m\]"
-
-    local ahead behind
-
-    ahead=$(echo "$git_status" | awk '/^# branch\.ab/ {gsub(/\+/,"",$3); print $3}')
-    behind=$(echo "$git_status" | awk '/^# branch\.ab/ {gsub(/-/,"",$4); print $4}')
-
-    [[ -n "$ahead" && "$ahead" != "0" ]] && git_info+=" \[\e[32m\]↑${ahead}\[\e[0m\]"
-    [[ -n "$behind" && "$behind" != "0" ]] && git_info+=" \[\e[31m\]↓${behind}\[\e[0m\]"
-
-    echo "$git_info"
+    git branch --show-current
 }
 
-parse_git_branch() {
-    git rev-parse --is-inside-work-tree &>/dev/null || return
-    printf "\[\e[35m\] %s\[\e[0m\]" "$(git branch --show-current)"
-}
-
-set_prompt() {
-    PS1="\[\e[38;5;111m\]\[\e[0m\]\[\e[38;5;183m\]\[\e[0m\]\[\e[38;5;225m\]\[\e[0m\] \[\e[38;5;117m\] \W\[\e[0m\] \$(parse_git_branch)\$(git_prompt_status) "
-}
-
-PROMPT_COMMAND=set_prompt
+PS1="\[\e[38;5;117m\] \W\[\e[0m\] \[\e[35m\] \$(git_repo_if)\[\e[0m\]\[ \e[38;5;111m\] "
 
 bind '"\C-p":previous-history'
 bind '"\C-n":next-history'
