@@ -46,9 +46,9 @@ hl.bind(K(mod .. "" .. " + A"),
     hl.dispatch(hl.dsp.window.center())
   end)
 
-hl.bind(K(mod .. " + SHIFT + H"), hl.dsp.window.move({ workspace = "special:scratch", silent = true }))
-hl.bind(K(mod .. " + H"), hl.dsp.workspace.toggle_special("scratch"))
-hl.bind(K(mod .. " + SHIFT + J"), hl.dsp.window.move({ workspace = "special:music", silent = true }))
-hl.bind(K(mod .. " + J"), hl.dsp.workspace.toggle_special("music"))
+hl.bind(K(mod .. " + SHIFT + Z"), hl.dsp.window.move({ workspace = "special:scratch", silent = true }))
+hl.bind(K(mod .. " + Z"), hl.dsp.workspace.toggle_special("scratch"))
+hl.bind(K(mod .. " + SHIFT + X"), hl.dsp.window.move({ workspace = "special:music", silent = true }))
+hl.bind(K(mod .. " + X"), hl.dsp.workspace.toggle_special("music"))
 hl.bind(mod .. " + D", hl.dsp.window.fullscreen_state({ internal = 2, client = 0, action = "toggle", }))
 hl.bind(K("ALT + Tab"), hl.dsp.window.cycle_next())
