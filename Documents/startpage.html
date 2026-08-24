@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>New Tab</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#05070d;
+  --text:#dce6f2;
+  --accent:#00d9ff;
+  --accent2:#ff3cac;
+  --grid:rgba(0,217,255,.035);
+}
+[data-theme=nord]{
+  --bg:#111820;
+  --text:#d8dee9;
+  --accent:#88c0d0;
+  --accent2:#b48ead;
+  --grid:rgba(136,192,208,.035);
+}
+[data-theme=everforest]{
+  --bg:#2d353b;
+  --text:#d3c6aa;
+  --accent:#a7c080;
+  --accent2:#e67e80;
+  --grid:rgba(167,192,128,.035);
+}
+html,body{
+  width:100%;
+  height:100%;
+  margin:0;
+}
+body{
+  overflow:hidden;
+  background:var(--bg);
+  color:var(--text);
+  font-family:"JetBrains Mono",monospace;
+  cursor:none;
+  transition:background .5s,color .5s;
+}
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:
+    linear-gradient(var(--grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:55px 55px;
+  animation:grid 18s linear infinite;
+}
+@keyframes grid{
+  to{background-position:0 55px,55px 0}
+}
+body:after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 50%,transparent 0,transparent 45%,rgba(0,0,0,.18) 100%);
+}
+.main{
+  position:relative;
+  z-index:2;
+  height:100%;
+  display:grid;
+  place-items:center;
+}
+.clock{
+  text-align:center;
+  user-select:none;
+}
+.time{
+  display:flex;
+  align-items:baseline;
+  font-size:clamp(5rem,13vw,10rem);
+  font-weight:400;
+  letter-spacing:-.08em;
+  line-height:1;
+  text-shadow:0 0 30px color-mix(in srgb,var(--accent) 18%,transparent);
+}
+.hours{color:var(--accent2)}
+.minutes{color:var(--accent)}
+.seconds{
+  margin-left:10px;
+  font-size:.3em;
+  color:var(--text);
+  opacity:.5;
+}
+.ampm{
+  margin-left:16px;
+  font-size:.17em;
+  letter-spacing:2px;
+  color:var(--accent);
+}
+.date{
+  margin-top:25px;
+  color:var(--text);
+  opacity:.48;
+  font-size:11px;
+  letter-spacing:5px;
+}
+.menu{
+  position:fixed;
+  z-index:10;
+  top:25px;
+  right:28px;
+  width:30px;
+  height:30px;
+  display:grid;
+  place-items:center;
+  color:#697586;
+  cursor:none;
+  font-size:18px;
+  transition:.2s;
+}
+.menu:hover{
+  color:var(--accent);
+  text-shadow:0 0 12px var(--accent);
+}
+.panel{
+  position:fixed;
+  z-index:20;
+  top:62px;
+  right:28px;
+  width:165px;
+  padding:7px;
+  display:none;
+  background:rgba(5,8,14,.97);
+  border:1px solid var(--accent);
+  box-shadow:0 0 30px rgba(0,0,0,.5);
+  backdrop-filter:blur(12px);
+}
+.panel.open{
+  display:block;
+  animation:panel .15s ease-out;
+}
+@keyframes panel{
+  from{opacity:0;transform:translateY(-6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.title{
+  padding:8px 9px;
+  color:#697586;
+  font-size:8px;
+  letter-spacing:2px;
+}
+.theme{
+  width:100%;
+  padding:10px 9px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  border:0;
+  background:transparent;
+  color:#7c8898;
+  font:9px "JetBrains Mono",monospace;
+  text-align:left;
+  cursor:none;
+}
+.theme:hover{
+  color:var(--text);
+  background:rgba(255,255,255,.035);
+}
+.theme.active{color:var(--accent)}
+.dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:currentColor;
+  box-shadow:0 0 8px currentColor;
+}
+.corner{
+  position:fixed;
+  width:70px;
+  height:70px;
+  opacity:.35;
+  pointer-events:none;
+}
+.corner:before,.corner:after{
+  content:"";
+  position:absolute;
+  background:var(--accent);
+}
+.tl{top:24px;left:24px}
+.tr{top:24px;right:24px;transform:rotate(90deg)}
+.bl{bottom:24px;left:24px;transform:rotate(-90deg)}
+.br{bottom:24px;right:24px;transform:rotate(180deg)}
+.corner:before{width:55px;height:1px}
+.corner:after{width:1px;height:55px}
+
+.cursor-dot,
+.cursor-ring{
+  position:fixed;
+  z-index:100;
+  pointer-events:none;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+}
+.cursor-dot{
+  width:5px;
+  height:5px;
+  background:var(--accent);
+  box-shadow:0 0 10px var(--accent),0 0 20px var(--accent);
+}
+.cursor-ring{
+  width:34px;
+  height:34px;
+  border:1px solid color-mix(in srgb,var(--accent) 65%,transparent);
+  transition:
+    width .25s cubic-bezier(.16,1,.3,1),
+    height .25s cubic-bezier(.16,1,.3,1),
+    border-color .25s,
+    background .25s;
+}
+.cursor-ring.active{
+  width:52px;
+  height:52px;
+  border-color:var(--accent);
+  background:color-mix(in srgb,var(--accent) 6%,transparent);
+}
+.cursor-ring.click{
+  width:22px;
+  height:22px;
+}
+@media(pointer:coarse){
+  body{cursor:auto}
+  .cursor-dot,.cursor-ring{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  body:before{animation:none}
+}
+</style>
+</head>
+<body>
+
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<div class="corner tl"></div>
+<div class="corner tr"></div>
+<div class="corner bl"></div>
+<div class="corner br"></div>
+
+<div class="menu" id="menu">⋮</div>
+
+<div class="panel" id="panel">
+  <div class="title">THEME</div>
+  <button class="theme" data-theme="cyber"><span class="dot"></span>CYBER</button>
+  <button class="theme" data-theme="nord"><span class="dot"></span>NORD</button>
+  <button class="theme" data-theme="everforest"><span class="dot"></span>EVERFOREST</button>
+</div>
+
+<main class="main">
+  <div class="clock">
+    <div class="time">
+      <span class="hours" id="hours"></span>:
+      <span class="minutes" id="minutes"></span>
+      <span class="seconds" id="seconds"></span>
+      <span class="ampm" id="ampm"></span>
+    </div>
+    <div class="date" id="date"></div>
+  </div>
+</main>
+
+<script>
+const root=document.documentElement;
+const menu=document.getElementById("menu");
+const panel=document.getElementById("panel");
+const ring=document.getElementById("cursorRing");
+const dot=document.getElementById("cursorDot");
+const themes=document.querySelectorAll(".theme");
+
+let mx=innerWidth/2,my=innerHeight/2;
+let rx=mx,ry=my;
+
+addEventListener("pointermove",e=>{
+  mx=e.clientX;
+  my=e.clientY;
+});
+
+function cursor(){
+  rx+=(mx-rx)*.16;
+  ry+=(my-ry)*.16;
+  dot.style.left=mx+"px";
+  dot.style.top=my+"px";
+  ring.style.left=rx+"px";
+  ring.style.top=ry+"px";
+  requestAnimationFrame(cursor);
+}
+cursor();
+
+document.querySelectorAll("button,.menu").forEach(el=>{
+  el.addEventListener("mouseenter",()=>ring.classList.add("active"));
+  el.addEventListener("mouseleave",()=>ring.classList.remove("active"));
+});
+
+addEventListener("pointerdown",()=>ring.classList.add("click"));
+addEventListener("pointerup",()=>ring.classList.remove("click"));
+
+function updateClock(){
+  const d=new Date();
+  let h=d.getHours();
+
+  ampm.textContent=h>=12?"PM":"AM";
+  h=h%12||12;
+
+  hours.textContent=String(h).padStart(2,"0");
+  minutes.textContent=String(d.getMinutes()).padStart(2,"0");
+  seconds.textContent=String(d.getSeconds()).padStart(2,"0");
+
+  date.textContent=d.toLocaleDateString("en-US",{
+    weekday:"long",
+    day:"2-digit",
+    month:"long",
+    year:"numeric"
+  }).toUpperCase();
+}
+
+function setTheme(theme){
+  if(theme==="cyber") delete root.dataset.theme;
+  else root.dataset.theme=theme;
+  localStorage.setItem("theme",theme);
+  themes.forEach(x=>x.classList.toggle("active",x.dataset.theme===theme));
+}
+
+setTheme(localStorage.getItem("theme")||"cyber");
+
+menu.onclick=e=>{
+  e.stopPropagation();
+  panel.classList.toggle("open");
+};
+
+panel.onclick=e=>e.stopPropagation();
+
+themes.forEach(button=>{
+  button.onclick=()=>{
+    setTheme(button.dataset.theme);
+    panel.classList.remove("open");
+  };
+});
+
+document.onclick=()=>{
+  panel.classList.remove("open");
+};
+
+updateClock();
+setInterval(updateClock,1000);
+</script>
+
+</body>
+</html>
