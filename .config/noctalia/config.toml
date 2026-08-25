@@ -1,26 +1,42 @@
-# .local/state/noctalia/settings.toml
-config_version = 13
-
 [accessibility]
 ui_scale = 1.2
 
 [bar.default]
-background_opacity = 0.22
+background_opacity = 0.59999998658895493
 capsule = true
 capsule_group = []
 capsule_radius = 4
 center = [ "workspaces" ]
 concave_edge_corners = false
 end = [ "tray", "bluetooth", "network", "volume", "battery", "session" ]
+margin_edge = 0
 margin_ends = 0
-radius = 0
-scale = 1.1
+radius = 5
+radius_bottom_left = 5
+radius_bottom_right = 5
+radius_top_left = 0
+radius_top_right = 0
+scale = 1.1000000000000001
 shadow = false
 start = [ "clock", "sysmon_3", "widget", "widget_2" ]
 thickness = 30
 
 [control_center.calendar]
 show_events_card = false
+
+[desktop_widgets]
+schema_version = 2
+widget_order = []
+
+    [desktop_widgets.grid]
+    cell_size = 16
+    major_interval = 4
+    visible = true
+
+    [desktop_widgets.widget]
+
+[dock]
+radius = 4
 
 [lockscreen_widgets]
 enabled = false
@@ -46,7 +62,7 @@ widget_order = [ "lockscreen-login-box@eDP-1" ]
         [lockscreen_widgets.widget."lockscreen-login-box@eDP-1".settings]
         background_color = "surface_variant"
         background_opacity = 0.88
-        background_radius = 4
+        background_radius = 12.0
         center_password_text = false
         input_opacity = 1.0
         input_radius = 6.0
@@ -69,8 +85,15 @@ overlay_height = 32
 overlay_position = "bottom_left"
 overlay_width = 160
 
+[plugin_settings."hj/aur"]
+helper = "yay"
+
+[plugin_settings."omarchy/aur"]
+helper = "yay"
+panel_placement = "attached"
+
 [plugins]
-enabled = [ "alexander/screen-toolkit", "omarchy/aur", "h-jangra/keyviz" ]
+enabled = [ "alexander/screen-toolkit", "omarchy/aur", "h-jangra/keyviz", "hj/aur" ]
 
     [[plugins.source]]
     kind = "git"
@@ -102,12 +125,14 @@ settings_show_advanced = true
 
     [shell.panel]
     borders = false
+    clipboard_placement = "attached"
     open_near_click_control_center = true
     session_placement = "floating"
     session_position = "center"
+    transparency_mode = "soft"
 
     [shell.screen_corners]
-    size = 2
+    size = 8
 
     [shell.screenshot]
     copy_to_clipboard = false
@@ -120,24 +145,28 @@ settings_show_advanced = true
     countdown_seconds = 0.0
     enabled = true
     shortcut = "1"
+    variant = "default"
 
     [[shell.session.actions]]
     action = "logout"
     countdown_seconds = 0.0
     enabled = true
     shortcut = "2"
+    variant = "default"
 
     [[shell.session.actions]]
     action = "lock_and_suspend"
     countdown_seconds = 3.0
     enabled = true
     shortcut = "3"
+    variant = "default"
 
     [[shell.session.actions]]
     action = "reboot"
     countdown_seconds = 3.0
     enabled = true
     shortcut = "4"
+    variant = "default"
 
     [[shell.session.actions]]
     action = "shutdown"
@@ -151,6 +180,7 @@ gpu_poll_seconds = 2
 
 [theme]
 builtin = "Nord"
+community_palette = "Oxocarbon"
 mode = "dark"
 source = "builtin"
 wallpaper_scheme = "m3-tonal-spot"
@@ -160,6 +190,15 @@ wallpaper_scheme = "m3-tonal-spot"
 
 [wallpaper.default]
 path = "/home/hj/Pictures/Wallpapers/wallhaven-d8orko.png"
+
+[wallpaper.last]
+path = "/home/hj/Pictures/Wallpapers/wallhaven-d8orko.png"
+
+[wallpaper.monitors.eDP-1]
+path = "/home/hj/Pictures/Wallpapers/wallhaven-d8orko.png"
+
+[widget.battery]
+hide_when_full = true
 
 [widget.bluetooth]
 hide_when_no_connected_device = true
@@ -185,11 +224,23 @@ color = "secondary"
 [widget.session]
 color = "error"
 
+[widget.spacer_1]
+type = "spacer"
+
+[widget.sysmon_2]
+glyph = "gpu-usage"
+show_value = false
+stat = "gpu_temp"
+type = "sysmon"
+
 [widget.sysmon_3]
 glyph = "cpu-2"
 stat = "ram_used"
 type = "sysmon"
 visualization = "none"
+
+[widget.temp]
+show_value = false
 
 [widget.tray]
 capsule = true
@@ -205,9 +256,9 @@ type = "alexander/screen-toolkit:widget"
 type = "h-jangra/keyviz:widget"
 
 [widget.workspaces]
+active_pill_size = 2.5
 capsule = true
 capsule_fill = "on_primary"
 inactive_pill_size = 1.0
 pill_scale = 0.80000000000000004
 show_labels = false
-

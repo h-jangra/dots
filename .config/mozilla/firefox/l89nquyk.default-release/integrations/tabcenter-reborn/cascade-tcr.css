@@ -1,0 +1,73 @@
+/* when TCR is active */
+#main-window:has(#sidebar-box[sidebarcommand*="tabcenter"]:not([hidden])) {
+    /* hide tab bar */
+    #TabsToolbar {
+        display: none !important;
+    }
+
+    /* ensure nav bar is full width (for oneline layout) */
+    #nav-bar {
+        width: 100vw !important;
+    }
+
+    #browser {
+        position: relative !important;
+
+        #tabbrowser-tabbox {
+            margin-left: 50px !important;
+        }
+
+        & #sidebar {
+            border-radius: 0px !important;
+            outline: none !important;
+        }
+
+        #sidebar-box[sidebarcommand*="tabcenter"] {
+            display: block;
+
+            position: absolute !important;
+            top: 0;
+            bottom: 0;
+            z-index: 3 !important;
+            transition: all 0.2s ease;
+            overflow: hidden;
+
+            min-width: 50px !important;
+            max-width: 50px !important;
+            padding-bottom: 0px !important;
+
+            &:hover {
+                max-width: 250px !important;
+            }
+
+            /* remove sidebar separator */
+            & ~ #sidebar-splitter {
+                display: none;
+            }
+
+            /* make full height as we are positioning absolutely */
+            .sidebar-browser-stack {
+                height: 100%;
+            }
+        }
+
+        /* hide sidebar */
+        #sidebar-main {
+            display: none;
+        }
+    }
+}
+
+/* hide panel title */
+#sidebar-panel-header {
+    display: none !important;
+}
+
+/* needed to increase specifity, remove sidebar gap when in fullscreen */
+#main-window[inFullscreen][inDOMFullscreen]:has(
+        #sidebar-box[sidebarcommand*="tabcenter"]:not([hidden])
+    )
+    #browser
+    #tabbrowser-tabbox {
+    margin-left: 0px !important;
+}
