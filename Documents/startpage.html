@@ -16,7 +16,7 @@
 [data-theme=nord]{
   --bg:#111820;
   --text:#d8dee9;
-  --accent:#88c0d0;
+  --accent:#88C0D0;
   --accent2:#b48ead;
   --grid:rgba(136,192,208,.035);
 }
@@ -99,7 +99,7 @@ body:after{
   margin-top:25px;
   color:var(--text);
   opacity:.48;
-  font-size:11px;
+  font-size:18px;
   letter-spacing:5px;
 }
 .menu{
@@ -172,24 +172,11 @@ body:after{
   background:currentColor;
   box-shadow:0 0 8px currentColor;
 }
-.corner{
-  position:fixed;
-  width:70px;
-  height:70px;
-  opacity:.35;
-  pointer-events:none;
-}
-.corner:before,.corner:after{
-  content:"";
-  position:absolute;
-  background:var(--accent);
-}
+
 .tl{top:24px;left:24px}
 .tr{top:24px;right:24px;transform:rotate(90deg)}
 .bl{bottom:24px;left:24px;transform:rotate(-90deg)}
 .br{bottom:24px;right:24px;transform:rotate(180deg)}
-.corner:before{width:55px;height:1px}
-.corner:after{width:1px;height:55px}
 
 .cursor-dot,
 .cursor-ring{
@@ -238,12 +225,6 @@ body:after{
 
 <div class="cursor-dot" id="cursorDot"></div>
 <div class="cursor-ring" id="cursorRing"></div>
-
-<div class="corner tl"></div>
-<div class="corner tr"></div>
-<div class="corner bl"></div>
-<div class="corner br"></div>
-
 <div class="menu" id="menu">⋮</div>
 
 <div class="panel" id="panel">
