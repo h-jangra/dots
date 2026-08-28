@@ -17,3 +17,11 @@ end
 zoxide init fish | source
 
 alias tree='exa --tree'
+
+function rm --wraps rm
+    read -P "Really? [y/N] " c; string match -qi y $c; and command rm $argv
+end
+
+function mem
+    smem -tkP $argv[1] | tail -1 | awk '{print $NF}'
+end
