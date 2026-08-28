@@ -12,17 +12,14 @@ alias ls='eza --icons'
 alias ll='eza -lh --icons --git'
 alias la='eza -lah --icons --git'
 
-dir_name() {
-    printf '\[\e[38;5;117m\] %s\[\e[0m\]' "$PWD"
-}
-
 git_repo_if() {
     git rev-parse --is-inside-work-tree &>/dev/null || return
-    git branch --show-current
+    printf '%s%s' "$(git branch --show-current)" "$(git status --porcelain | grep -q . && echo '*')"
 }
 
-PS1="\[\e[38;5;117m\] \W\[\e[0m\] \[\e[35m\] \$(git_repo_if)\[\e[0m\]\[ \e[38;5;111m\] "
+PS1='\[\e[38;5;110m\]\w\[\e[0m\] \[\e[38;5;60m\]$(git_repo_if)\[\e[0m\]\n\[\e[38;5;139m\]❯\[\e[0m\] '
 
+bind '"\C-c":unix-line-discard'
 bind '"\C-p":previous-history'
 bind '"\C-n":next-history'
 bind '"\e[1;5D":backward-word'

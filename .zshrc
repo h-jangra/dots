@@ -6,33 +6,15 @@ colors
 zstyle ':vcs_info:*' enable git
 zstyle ':vcs_info:git:*' formats '%F{5} %b%f'
 
-git_prompt_status() {
+git_prompt() {
   git rev-parse --is-inside-work-tree &>/dev/null || return
-
-  local git_info=""
-  local git_status=$(git status --porcelain=v2 --branch 2>/dev/null)
-
-  echo "$git_status" | grep -q '^1 ' && git_info+=" %F{3}●%f"
-  echo "$git_status" | grep -q '^? ' && git_info+=" %F{1}?%f"
-
-  local ahead behind
-
-  ahead=$(echo "$git_status" | awk '/^# branch\.ab/ {gsub(/\+/,"",$3); print $3}')
-  behind=$(echo "$git_status" | awk '/^# branch\.ab/ {gsub(/-/,"",$4); print $4}')
-
-  [[ -n "$ahead" && "$ahead" != "0" ]] && git_info+=" %F{2}↑${ahead}%f"
-  [[ -n "$behind" && "$behind" != "0" ]] && git_info+=" %F{1}↓${behind}%f"
-
-  echo "$git_info"
+  printf '%s%s' "$(git branch --show-current)" "$(git status --porcelain | grep -q . && echo '*')"
 }
 
-precmd() {
-  vcs_info
-}
+precmd() { git_prompt >/dev/null }
 
-setopt PROMPT_SUBST
-
-PROMPT='%F{111}%f%F{183}%f%F{225}%f %F{117} %1~%f ${vcs_info_msg_0_}$(git_prompt_status) '
+PROMPT='%F{#88c0d0}%~%f %F{#4c566a}$(git_prompt)%f
+%F{#b48ead}❯%f '
 
 setopt AUTO_CD
 setopt HIST_IGNORE_DUPS
