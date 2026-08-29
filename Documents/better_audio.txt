@@ -1,0 +1,17 @@
+Comment: Voice Over EQ and Compression Macro
+Comment: Apply factory EQ presets in sequence
+Comment: Compressor uses Noise Floor -40 dB
+
+SelectAll:
+
+Comment: Bass boost...
+FilterCurve:Use_Preset="Factory Preset:Bass Boost"
+
+Comment: Treble boost...
+FilterCurve:Use_Preset="Factory Preset:Treble Boost"
+
+Comment: Low rolloff for speech...
+FilterCurve:Use_Preset="Factory Preset:Low rolloff for speech"
+
+Comment: Compress voice...
+Compressor:AttackTime="0.2" NoiseFloor="-40" Normalize="1" Ratio="2" ReleaseTime="1" Threshold="-14" UsePeak="0"

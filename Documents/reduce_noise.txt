@@ -1,0 +1,4 @@
+Comment: Noise Reduction
+Comment: Get noise profile manually before running this macro
+
+NoiseReduction:AttackDecay="0.0" FrequencySmoothing="3" NoiseReduction="12" Sensitivity="6"
