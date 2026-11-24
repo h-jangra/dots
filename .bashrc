@@ -6,9 +6,9 @@ HISTCONTROL=ignoredups:erasedups
 shopt -s autocd cdspell checkwinsize histappend
 
 alias l='eza -1'
-alias ls='eza --icons'
-alias ll='eza -lh --icons --git'
-alias la='eza -lah --icons --git'
+alias ls='eza --icons=auto'
+alias ll='eza -lh --icons=auto --git'
+alias la='eza -lah --icons=auto --git'
 
 git_repo_if() {
     git rev-parse --is-inside-work-tree &>/dev/null || return
