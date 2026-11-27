@@ -44,7 +44,9 @@ for cmd in yay pacman fzf awk sort cut; do
 done
 
 list_repo() {
-    yay -Slq
+    comm -23 \
+        <(yay -Slq | sort -u) \
+        <(pacman -Qq | sort -u)
 }
 
 list_installed() {
