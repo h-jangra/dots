@@ -9,7 +9,6 @@ failed=0
 
 finish() {
     local status=$?
-
     if (( failed || status != 0 )); then
         printf '\n'
         read -r -n 1 -s -p 'Operation failed. Press any key to close...' </dev/tty
@@ -17,14 +16,11 @@ finish() {
     fi
 }
 
-trap finish EXIT
-
 exec 9>"$LOCK"
 
 if ! flock -n 9; then
     if [[ -f "$PIDFILE" ]]; then
         pid=$(<"$PIDFILE")
-
         if [[ "$pid" =~ ^[0-9]+$ ]] && kill -0 "$pid" 2>/dev/null; then
             kill -TERM "$pid" 2>/dev/null || true
         fi
@@ -35,53 +31,82 @@ fi
 echo "$$" > "$PIDFILE"
 trap 'rm -f "$PIDFILE"; finish' EXIT
 
-for cmd in yay pacman fzf awk sort cut; do
-    if ! command -v "$cmd" >/dev/null 2>&1; then
+for cmd in yay pacman fzf awk sort cut flock; do
+    command -v "$cmd" >/dev/null 2>&1 || {
         printf 'Error: %s not found.\n' "$cmd"
         failed=1
         exit 1
-    fi
+    }
 done
 
+declare -A installed
+
+load_installed() {
+    installed=()
+    while IFS= read -r pkg; do
+        installed["$pkg"]=1
+    done < <(pacman -Qq)
+}
+
+load_installed
+
+printf 'Loading package list (first run may take a while)...\n' >&2
+PACKAGE_LIST=$(yay -P --complete) || {
+    printf 'Error: Failed to retrieve package list.\n'
+    failed=1
+    exit 1
+}
+
+repo_list=()
+
+while IFS=$'\t' read -r pkg _; do
+    [[ -z "$pkg" ]] && continue
+    repo_list+=("$pkg")
+done <<< "$PACKAGE_LIST"
+
 list_repo() {
-    comm -23 \
-        <(yay -Slq | sort -u) \
-        <(pacman -Qq | sort -u)
+    printf '%s\n' "${repo_list[@]}"
 }
 
 list_installed() {
     pacman -Qi |
     awk '
-        /^Name/ {
-            name = $3
-        }
+        /^Name/ { name=$3 }
         /^Installed Size/ {
-            size = $4
-            unit = $5
-
-            mult = 1
-            if (unit == "KiB") mult = 1024
-            if (unit == "MiB") mult = 1024^2
-            if (unit == "GiB") mult = 1024^3
-
-            bytes = size * mult
-            printf "%020.0f\t[✓] %8.1f %-3s %s\n", bytes, size, unit, name
+            size=$4
+            unit=$5
+            mult=1
+            if (unit=="KiB") mult=1024
+            if (unit=="MiB") mult=1048576
+            if (unit=="GiB") mult=1073741824
+            printf "%020.0f\t[✓] %8.1f %-3s %s\n", size*mult, size, unit, name
         }
-    ' |
-    sort -rn |
-    cut -f2-
+    ' | sort -rn | cut -f2-
 }
 
 preview() {
     local pkg="${1##* }"
-    pacman -Qi "$pkg" 2>/dev/null ||
+    local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/yami/pkg-preview"
+    local cache_file="$cache_dir/$pkg"
+
+    if [[ -f "$cache_file" ]]; then
+        cat "$cache_file"
+        return
+    fi
+
+    mkdir -p "$cache_dir" 2>/dev/null
+    {
+        pacman -Qi "$pkg" 2>/dev/null && exit 0
+        pacman -Si "$pkg" 2>/dev/null && exit 0
+        printf 'Name             : %s\nSource           : AUR\n\n' "$pkg"
         yay -Si "$pkg" 2>/dev/null ||
-        yay -Gip "$pkg" 2>/dev/null
+            printf 'AUR metadata unavailable: %s\n' "$pkg"
+    } | tee "$cache_file"
 }
 
 export -f preview list_repo list_installed
 
-selected="$(
+selected=$(
     list_repo |
     fzf \
         --multi \
@@ -98,19 +123,17 @@ selected="$(
         --color='pointer:green,marker:green' \
         --header='TAB select • ENTER install/remove • ALT-I installed • ALT-A packages • ALT-P preview' \
         --prompt='Package> '
-)" || exit 0
+) || exit 0
 
 [[ -z "$selected" ]] && exit 0
 
-mapfile -t pkgs < <(
-    awk '{print $NF}' <<< "$selected" | sort -u
-)
+mapfile -t pkgs < <(awk '{print $NF}' <<< "$selected" | sort -u)
 
 install=()
 remove=()
 
 for pkg in "${pkgs[@]}"; do
-    if pacman -Q "$pkg" &>/dev/null; then
+    if [[ ${installed[$pkg]+x} ]]; then
         remove+=("$pkg")
     else
         install+=("$pkg")
@@ -147,7 +170,7 @@ if ((${#remove[@]})); then
     fi
 fi
 
-if ((${#install[@]} || ${#remove[@]})) && command -v updatedb >/dev/null 2>&1; then
+if ((${#install[@]} || ${#remove[@])) && command -v updatedb >/dev/null 2>&1; then
     sudo updatedb >/dev/null 2>&1 </dev/null &
 fi
 
