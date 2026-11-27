@@ -1,12 +1,50 @@
 #!/usr/bin/env bash
 
-command -v yay >/dev/null || {
-    echo "Error: yay not found."
-    exit 1
+set -uo pipefail
+
+LOCK="${XDG_RUNTIME_DIR:-/tmp}/pkg-installer.lock"
+PIDFILE="${XDG_RUNTIME_DIR:-/tmp}/pkg-installer.pid"
+
+failed=0
+
+finish() {
+    local status=$?
+
+    if (( failed || status != 0 )); then
+        printf '\n'
+        read -r -n 1 -s -p 'Operation failed. Press any key to close...' </dev/tty
+        printf '\n'
+    fi
 }
 
+trap finish EXIT
+
+exec 9>"$LOCK"
+
+if ! flock -n 9; then
+    if [[ -f "$PIDFILE" ]]; then
+        pid=$(<"$PIDFILE")
+
+        if [[ "$pid" =~ ^[0-9]+$ ]] && kill -0 "$pid" 2>/dev/null; then
+            kill -TERM "$pid" 2>/dev/null || true
+        fi
+    fi
+    exit 0
+fi
+
+echo "$$" > "$PIDFILE"
+trap 'rm -f "$PIDFILE"; finish' EXIT
+
+for cmd in yay pacman fzf awk sort cut; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        printf 'Error: %s not found.\n' "$cmd"
+        failed=1
+        exit 1
+    fi
+done
+
 list_repo() {
-    pacman -Slq
+    yay -Slq
 }
 
 list_installed() {
@@ -35,7 +73,8 @@ list_installed() {
 preview() {
     local pkg="${1##* }"
     pacman -Qi "$pkg" 2>/dev/null ||
-        yay -Si "$pkg" 2>/dev/null
+        yay -Si "$pkg" 2>/dev/null ||
+        yay -Gip "$pkg" 2>/dev/null
 }
 
 export -f preview list_repo list_installed
@@ -57,13 +96,12 @@ selected="$(
         --color='pointer:green,marker:green' \
         --header='TAB select • ENTER install/remove • ALT-I installed • ALT-A packages • ALT-P preview' \
         --prompt='Package> '
-)"
+)" || exit 0
 
-(( $? == 0 )) || exit 130
 [[ -z "$selected" ]] && exit 0
 
 mapfile -t pkgs < <(
-    awk '{print $NF}' <<< "$selected"
+    awk '{print $NF}' <<< "$selected" | sort -u
 )
 
 install=()
@@ -77,14 +115,38 @@ for pkg in "${pkgs[@]}"; do
     fi
 done
 
+printf '\nSelected packages:\n'
+
 if ((${#install[@]})); then
-    yay -S "${install[@]}"
+    printf '\nInstall:\n'
+    printf '  + %s\n' "${install[@]}"
 fi
 
 if ((${#remove[@]})); then
-    yay -Rns "${remove[@]}"
+    printf '\nRemove:\n'
+    printf '  - %s\n' "${remove[@]}"
 fi
 
-command -v updatedb >/dev/null &&
-    sudo updatedb >/dev/null 2>&1 &
+printf '\n'
 
+if ((${#install[@]})); then
+    printf '%s\n' '--- Installing ---'
+    if ! yay -S "${install[@]}"; then
+        failed=1
+        exit 1
+    fi
+fi
+
+if ((${#remove[@]})); then
+    printf '\n%s\n' '--- Removing ---'
+    if ! yay -Rns "${remove[@]}"; then
+        failed=1
+        exit 1
+    fi
+fi
+
+if ((${#install[@]} || ${#remove[@]})) && command -v updatedb >/dev/null 2>&1; then
+    sudo updatedb >/dev/null 2>&1 </dev/null &
+fi
+
+exit 0
